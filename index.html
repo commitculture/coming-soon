@@ -327,9 +327,24 @@
 
     @media (max-width: 600px) {
       .screen { padding: 1.2rem; }
+      .top-bar { padding-bottom: 1rem; }
       .top-right { gap: 1rem; font-size: 0.55rem; }
       .headline { font-size: clamp(1.8rem, 8vw, 2.4rem); }
-      .bottom-left { gap: 1rem; }
+      
+      .links-row { 
+        flex-direction: column; 
+        align-items: stretch; 
+      }
+      .contact-card { 
+        justify-content: center; 
+      }
+      
+      .bottom-bar {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+        text-align: center;
+      }
     }
   </style>
 </head>
