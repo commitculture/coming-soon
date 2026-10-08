@@ -4,485 +4,264 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Commit Culture</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230c0c0c'/%3E%3Ctext x='3' y='22' font-family='monospace' font-size='13' font-weight='700' fill='%233d9970'%3E%3E_%3C/text%3E%3C/svg%3E" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html, body {
-      height: 100%;
-      background: #0c0c0c;
-      color: #e8e8e8;
-      font-family: 'Space Mono', monospace;
-      overflow: hidden;
+    body {
+      background-color: #0c0c0c;
+      color: #39ff14;
+      font-family: 'Courier New', Courier, monospace;
+      margin: 0;
+      padding: 1rem;
+      overflow-x: hidden;
+      font-size: 14px;
+      line-height: 1.5;
+      animation: flicker 0.15s infinite;
     }
-
-    /* Subtle noise */
+    
+    @keyframes flicker {
+      0% { opacity: 0.98; }
+      50% { opacity: 1; }
+      100% { opacity: 0.99; }
+    }
+    
+    /* CRT Scanlines */
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 10;
-      opacity: 0.35;
-    }
-
-    .screen {
-      height: 100vh;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      padding: 2rem;
-    }
-
-    /* TOP BAR */
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid #222;
-    }
-
-    .logo {
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      color: #fff;
-      text-transform: uppercase;
-    }
-
-    .logo span {
-      color: #555;
-      font-weight: 400;
-    }
-
-    .top-right {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      font-size: 0.62rem;
-      color: #444;
-      letter-spacing: 0.1em;
-    }
-
-    .dot {
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #3d9970;
-      box-shadow: 0 0 8px #3d9970;
-      animation: pulse 2.4s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
-    /* CENTER */
-    .center {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      align-items: center;
-      gap: 2rem;
-      padding: 1rem 0;
-    }
-
-
-
-    .terminal-block {
-      width: 100%;
-      max-width: 600px;
-    }
-
-    .prompt-line {
-      font-size: 0.72rem;
-      color: #444;
-      margin-bottom: 2rem;
-      letter-spacing: 0.05em;
-    }
-
-    .prompt-line span { color: #3d9970; }
-
-    .headline {
-      font-size: clamp(2rem, 5vw, 3.4rem);
-      font-weight: 700;
-      line-height: 1.08;
-      letter-spacing: -0.02em;
-      color: #fff;
-      margin-bottom: 1.6rem;
-    }
-
-    .headline .muted {
-      color: #333;
+      content: " ";
       display: block;
-    }
-
-    .headline .accent {
-      color: #fff;
-      display: block;
-    }
-
-    .subline {
-      font-size: 0.75rem;
-      color: #555;
-      line-height: 1.8;
-      margin-bottom: 2.2rem;
-      letter-spacing: 0.03em;
-      max-width: 420px;
-    }
-
-    /* OUTPUT LINES */
-    .output {
-      border-left: 1px solid #222;
-      padding-left: 1.2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .out-line {
-      font-size: 0.65rem;
-      letter-spacing: 0.08em;
-      color: #3a3a3a;
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      opacity: 0;
-      animation: fadeIn 0.4s ease forwards;
-    }
-
-    .out-line:nth-child(1) { animation-delay: 0.4s; }
-    .out-line:nth-child(2) { animation-delay: 0.8s; }
-    .out-line:nth-child(3) { animation-delay: 1.2s; }
-    .out-line:nth-child(4) { animation-delay: 1.6s; color: #3d9970; }
-
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
-
-    .out-line .bar {
-      width: 100px;
-      height: 2px;
-      background: #1e1e1e;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .out-line .bar::after {
-      content: '';
       position: absolute;
-      top: 0; left: -100%;
-      width: 100%;
-      height: 100%;
-      background: #3d9970;
-      animation: loadBar 1.2s ease forwards;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(18, 16, 16, 0) 50%,
+        rgba(0, 0, 0, 0.25) 50%
+      );
+      background-size: 100% 4px;
+      z-index: 50;
+      pointer-events: none;
     }
 
-    .out-line:nth-child(1) .bar::after { animation-delay: 0.5s; }
-    .out-line:nth-child(2) .bar::after { animation-delay: 0.9s; }
-    .out-line:nth-child(3) .bar::after { animation-delay: 1.3s; }
-
-    @keyframes loadBar {
-      to { left: 0; }
+    .glow {
+      text-shadow: 0 0 4px rgba(57, 255, 20, 0.6);
     }
 
-    /* Blinking cursor */
+    .glitch {
+      display: inline-block;
+      animation: glitch 2s linear infinite;
+      color: #ff0055;
+    }
+
+    @keyframes glitch {
+      0%, 10% { transform: translate(0, 0) skew(0deg); }
+      10.5% { transform: translate(-2px, 0) skew(-10deg); }
+      11% { transform: translate(2px, 0) skew(5deg); }
+      11.5% { transform: translate(0, 0) skew(0deg); }
+      50%, 60% { transform: translate(0, 0) skew(0deg); }
+      60.5% { transform: translate(3px, 0) skew(10deg); }
+      61% { transform: translate(-3px, 0) skew(-5deg); }
+      61.5% { transform: translate(0, 0) skew(0deg); }
+    }
+    
+    .ascii-art {
+      font-size: clamp(0.5rem, 1.4vw, 1.15rem);
+      line-height: 1.1;
+      background: linear-gradient(
+        to right,
+        #155915 0%,
+        #39ff14 40%,
+        #ffffff 50%,
+        #39ff14 60%,
+        #155915 100%
+      );
+      background-size: 300% auto;
+      color: transparent;
+      -webkit-background-clip: text;
+      background-clip: text;
+      animation: dataScan 4s ease-in-out infinite alternate;
+      font-weight: 900;
+      display: inline-block;
+      text-shadow: none; /* Removed glow so the scan effect is crisp */
+    }
+
+    @keyframes dataScan {
+      0% {
+        background-position: 0% center;
+      }
+      100% {
+        background-position: 100% center;
+      }
+    }
+    
+    pre {
+      margin: 1rem 0;
+      white-space: pre;
+      font-weight: bold;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: #39ff14;
+      text-decoration: none;
+      border-bottom: 1px dashed #39ff14;
+    }
+    
+    a:hover {
+      background: #39ff14;
+      color: #000;
+      border-bottom: 1px solid #39ff14;
+    }
+
+    #terminal {
+      max-width: 800px;
+      margin: 0 auto;
+      padding-top: 2rem;
+    }
+    
     .cursor {
       display: inline-block;
-      width: 9px;
-      height: 1.1em;
-      background: #fff;
-      vertical-align: text-bottom;
+      width: 8px;
+      height: 15px;
+      background-color: #39ff14;
       animation: blink 1s step-end infinite;
-      opacity: 0;
-      animation-delay: 2s;
+      vertical-align: bottom;
+      box-shadow: 0 0 5px #39ff14;
     }
-
+    
     @keyframes blink {
       0%, 100% { opacity: 1; }
       50% { opacity: 0; }
     }
-
-    /* LINKS ROW */
-    .links-row {
-      margin-top: 2.5rem;
-      padding-top: 1.5rem;
-      border-top: 1px dashed #222;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .contact-card {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      padding: 0.8rem 1.2rem;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid #222;
-      color: #888;
-      text-decoration: none;
-      font-size: 0.75rem;
-      letter-spacing: 0.05em;
-      transition: all 0.15s ease;
-    }
-
-    .contact-card svg {
-      width: 1.1rem;
-      height: 1.1rem;
-      color: #555;
-      transition: color 0.15s ease;
-    }
-
-    .contact-card:hover {
-      background: rgba(255, 255, 255, 0.05);
-      border-color: #444;
-      color: #ddd;
-    }
     
-    .card-mail:hover svg { color: #EA4335; }
-    .card-ig:hover svg { color: #E1306C; }
-    .card-li:hover svg { color: #0A66C2; }
-
-    /* Tree Animation */
-    .illustration {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .prompt {
+      color: #ff0055; /* root user color */
+      font-weight: bold;
     }
-
-    .illustration svg {
-      width: 100%;
-      max-width: 260px;
-      height: auto;
+    .dir {
+      color: #0055ff;
+      font-weight: bold;
     }
-
-    .anim-main-line {
-      stroke-dasharray: 400;
-      stroke-dashoffset: 400;
-      animation: drawLine 2s cubic-bezier(0.25, 1, 0.5, 1) forwards 1.6s;
-    }
-
-    .anim-branch-line {
-      clip-path: inset(0 0 100% 0);
-      animation: wipeDown 1s cubic-bezier(0.25, 1, 0.5, 1) forwards 2.2s;
-    }
-
-    @keyframes drawLine {
-      to { stroke-dashoffset: 0; }
-    }
-
-    @keyframes wipeDown {
-      to { clip-path: inset(0 0 0 0); }
-    }
-
-    .anim-node {
-      opacity: 0;
-      transform: translateY(-5px);
-      animation: dropNode 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-    }
-
-    @keyframes dropNode {
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .head-pulse circle:first-child {
-      animation: pulseGlow 2s infinite 3.5s;
-    }
-
-    @keyframes pulseGlow {
-      0%, 100% { r: 6px; stroke-width: 1.5; fill: rgba(61,153,112,0.08); }
-      50% { r: 8px; stroke-width: 2.5; fill: rgba(61,153,112,0.25); }
-    }
-
-    /* BOTTOM BAR */
-    .bottom-bar {
-      padding-top: 1.5rem;
-      border-top: 1px solid #1a1a1a;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.6rem;
-      color: #2e2e2e;
-      letter-spacing: 0.1em;
-    }
-
-    .bottom-left {
-      display: flex;
-      gap: 1.8rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .bottom-right { color: #2e2e2e; }
-
-    @media (max-width: 900px) {
-      .center { grid-template-columns: 1fr; }
-      .illustration { display: none; }
-    }
-
-    @media (max-width: 600px) {
-      .screen { padding: 1.2rem; }
-      .top-bar { padding-bottom: 1rem; }
-      .top-right { gap: 1rem; font-size: 0.55rem; }
-      .headline { font-size: clamp(1.8rem, 8vw, 2.4rem); }
-      
-      .links-row { 
-        flex-direction: column; 
-        align-items: stretch; 
-      }
-      .contact-card { 
-        justify-content: center; 
-      }
-      
-      .bottom-bar {
-        flex-direction: column;
-        align-items: center;
-        gap: 0.8rem;
-        text-align: center;
-      }
+    .text-muted {
+      color: #888;
     }
   </style>
 </head>
 <body>
-  <div class="screen">
+  <div id="terminal" class="glow"></div>
+  
+  <script>
+    const ascii = `
+   ____                          _ _      ____      _ _                  
+  / ___|___  _ __ ___  _ __ ___ (_) |_   / ___|   _| | |_ _   _ _ __ ___ 
+ | |   / _ \\| '_ \` _ \\| '_ \` _ \\| | __| | |  | | | | | __| | | | '__/ _ \\
+ | |__| (_) | | | | | | | | | | | | |_  | |__| |_| | | |_| |_| | | |  __/
+  \\____\\___/|_| |_| |_|_| |_| |_|_|\\__|  \\____\\__,_|_|\\__|\\__,_|_|  \\___|
+`;
 
-    <div class="top-bar">
-      <div class="logo">COMMIT<span>/</span>CULTURE</div>
-      <div class="top-right">
-        <span><span class="dot"></span></span>
-        <span>EST. 2026</span>
-        <span>v0.0.1-alpha</span>
-      </div>
-    </div>
+    // Simulated terminal output
+    const lines = [
+      { text: "<span class='prompt'>root@kali</span>:<span class='dir'>~</span># ./commit_culture.sh --init", type: 'html', delay: 400 },
+      { text: "[*] Initializing Commit Culture framework v0.0.1-alpha...", type: 'type', delay: 20 },
+      { text: "[+] Resolving dependencies....................... ", type: 'spinner', result: "<span style='color: #39ff14'>[OK]</span>", delay: 900 },
+      { text: "[+] Establishing connection to builder community. ", type: 'spinner', result: "<span style='color: #39ff14'>[OK]</span>", delay: 1200 },
+      { text: "[+] Bypassing talk filters....................... ", type: 'spinner', result: "<span style='color: #39ff14'>[SUCCESS]</span>", delay: 1500 },
+      { text: "<span class='glitch'>[!] WARNING: HIGH LEVELS OF SHIPPING DETECTED</span>", type: 'html', delay: 400 },
+      { text: " ", type: 'type', delay: 0 },
+      { text: ascii, type: 'pre', delay: 10 },
+      { text: "STATUS: COMING SOON", type: 'type', delay: 30 },
+      { text: "MISSION: LESS TALKING. MORE SHIPPING.", type: 'type', delay: 30 },
+      { text: " ", type: 'type', delay: 0 },
+      { text: "> A community for developers, builders, hackers, and", type: 'type', delay: 15 },
+      { text: "> curious people who like building things.", type: 'type', delay: 15 },
+      { text: " ", type: 'type', delay: 0 },
+      { text: "[*] Establishing contact vectors:", type: 'type', delay: 20 },
+      { text: "    [1] Email:     <a href='mailto:hello@commitculture.dev'>hello@commitculture.dev</a>", type: 'html', delay: 200 },
+      { text: "    [2] Instagram: <a href='https://www.instagram.com/commit.culture/' target='_blank'>@commit.culture</a>", type: 'html', delay: 200 },
+      { text: "    [3] LinkedIn:  <a href='https://www.linkedin.com/company/commitculture/' target='_blank'>company/commitculture</a>", type: 'html', delay: 200 },
+      { text: " ", type: 'type', delay: 0 },
+      { text: "<span class='prompt'>root@kali</span>:<span class='dir'>~/commit-culture</span># <span class='cursor'></span>", type: 'end', delay: 0 }
+    ];
 
-    <div class="center">
-      <div class="terminal-block">
-        <div class="prompt-line"><span>~/commit-culture</span> $ status</div>
+    const term = document.getElementById('terminal');
+    let lineIdx = 0;
 
-        <h1 class="headline">
-          <span class="muted">we're cooking</span>
-          <span class="accent">something<br/>proper.<span class="cursor"></span></span>
-        </h1>
-
-        <p class="subline">
-          a community for developers, builders<br/>
-          and people who like making things.<br/>
-          it'll be worth the wait.
-        </p>
-
-        <div class="output">
-          <div class="out-line">
-            <span>community</span>
-            <span class="bar"></span>
-            <span>assembling</span>
-          </div>
-          <div class="out-line">
-            <span>infrastructure</span>
-            <span class="bar"></span>
-            <span>cooking</span>
-          </div>
-          <div class="out-line">
-            <span>events</span>
-            <span class="bar"></span>
-            <span>planned</span>
-          </div>
-          <div class="out-line">
-            <span>status</span>
-            <span>&mdash;</span>
-            <span>SOON&trade;</span>
-          </div>
-        </div>
-
-        <div class="links-row">
-          <a href="mailto:hello@commitculture.dev" class="contact-card card-mail">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-            <span>hello@commitculture.dev</span>
-          </a>
-          <a href="https://www.instagram.com/commit.culture/" target="_blank" rel="noopener" class="contact-card card-ig">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-            <span>instagram</span>
-          </a>
-          <a href="https://www.linkedin.com/company/commitculture/" target="_blank" rel="noopener" class="contact-card card-li">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
-            <span>linkedin</span>
-          </a>
-        </div>
-      </div>
-
-      <!-- Commit graph illustration -->
-      <div class="illustration">
-        <svg viewBox="0 0 180 420" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Main branch vertical line -->
-          <line class="anim-main-line" x1="72" y1="20" x2="72" y2="400" stroke="#1e1e1e" stroke-width="1.5"/>
-
-          <!-- Feature branch: out and back -->
-          <path class="anim-branch-line" d="M72 160 Q72 200 120 200 Q120 200 120 240 Q120 280 72 280" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-dasharray="3 3"/>
-
-          <!-- Node: commit 1 -->
-          <g class="anim-node" style="animation-delay: 1.8s">
-            <circle cx="72" cy="44" r="5" stroke="#252525" stroke-width="1.5" fill="#0c0c0c"/>
-            <text x="88" y="48" font-family="monospace" font-size="8" fill="#252525">init repo</text>
-            <text x="56" y="47" font-family="monospace" font-size="7" fill="#1e1e1e" text-anchor="end">main</text>
-          </g>
-
-          <!-- Node: commit 2 -->
-          <g class="anim-node" style="animation-delay: 2.0s">
-            <circle cx="72" cy="96" r="5" stroke="#252525" stroke-width="1.5" fill="#0c0c0c"/>
-            <text x="88" y="100" font-family="monospace" font-size="8" fill="#252525">add: community</text>
-            <text x="56" y="99" font-family="monospace" font-size="7" fill="#1a1a1a" text-anchor="end">&#x25cf;</text>
-          </g>
-
-          <!-- Node: commit 3 (branch point) -->
-          <g class="anim-node" style="animation-delay: 2.2s">
-            <circle cx="72" cy="148" r="5" stroke="#2a2a2a" stroke-width="1.5" fill="#0c0c0c"/>
-            <text x="88" y="152" font-family="monospace" font-size="8" fill="#252525">feat: events</text>
-            <text x="56" y="151" font-family="monospace" font-size="7" fill="#1a1a1a" text-anchor="end">&#x25cf;</text>
-          </g>
-
-          <!-- Feature branch node -->
-          <g class="anim-node" style="animation-delay: 2.5s">
-            <circle cx="120" cy="220" r="4" stroke="#222" stroke-width="1.5" fill="#0c0c0c"/>
-            <text x="132" y="224" font-family="monospace" font-size="8" fill="#1e1e1e">wip</text>
-          </g>
-
-          <!-- Node: merge back -->
-          <g class="anim-node" style="animation-delay: 2.8s">
-            <circle cx="72" cy="290" r="5" stroke="#2a2a2a" stroke-width="1.5" fill="#0c0c0c"/>
-            <text x="88" y="294" font-family="monospace" font-size="8" fill="#252525">merge: branch</text>
-            <text x="56" y="293" font-family="monospace" font-size="7" fill="#1a1a1a" text-anchor="end">&#x25cf;</text>
-          </g>
-
-          <!-- Node: commit 5 -->
-          <g class="anim-node" style="animation-delay: 3.0s">
-            <circle cx="72" cy="340" r="5" stroke="#2a2a2a" stroke-width="1.5" fill="#0c0c0c"/>
-            <text x="88" y="344" font-family="monospace" font-size="8" fill="#252525">chore: cleanup</text>
-          </g>
-
-          <!-- HEAD node (accent) -->
-          <g class="anim-node" style="animation-delay: 3.2s">
-            <g class="head-pulse">
-              <circle cx="72" cy="390" r="6" stroke="#3d9970" stroke-width="1.5" fill="rgba(61,153,112,0.08)"/>
-              <circle cx="72" cy="390" r="2" fill="#3d9970"/>
-            </g>
-            <text x="88" y="387" font-family="monospace" font-size="8" fill="#3d9970">HEAD</text>
-            <text x="88" y="398" font-family="monospace" font-size="7" fill="#2a6649">&#x2192; main</text>
-          </g>
-        </svg>
-      </div>
-    </div>
-
-    <div class="bottom-bar">
-      <div class="bottom-left">
-        <span>BUILD &bull; CONTRIBUTE &bull; BELONG</span>
-      </div>
-      <div class="bottom-right">LESS TALKING. MORE SHIPPING.</div>
-    </div>
-
-  </div>
+    function typeWriter() {
+      if (lineIdx >= lines.length) return;
+      
+      const line = lines[lineIdx];
+      const div = document.createElement('div');
+      
+      if (line.type === 'end') {
+        div.innerHTML = line.text;
+        term.appendChild(div);
+        return;
+      }
+      
+      if (line.type === 'pre') {
+        const pre = document.createElement('pre');
+        pre.className = 'ascii-art';
+        pre.textContent = line.text;
+        term.appendChild(pre);
+        lineIdx++;
+        setTimeout(typeWriter, line.delay);
+        return;
+      }
+      
+      if (line.type === 'html') {
+        div.innerHTML = line.text;
+        term.appendChild(div);
+        lineIdx++;
+        setTimeout(typeWriter, line.delay);
+        return;
+      }
+      
+      if (line.type === 'spinner') {
+        div.innerHTML = line.text;
+        const spinSpan = document.createElement('span');
+        div.appendChild(spinSpan);
+        term.appendChild(div);
+        
+        const chars = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+        let c = 0;
+        const intv = setInterval(() => {
+          spinSpan.textContent = chars[c++ % chars.length];
+        }, 50);
+        
+        setTimeout(() => {
+          clearInterval(intv);
+          spinSpan.outerHTML = line.result;
+          lineIdx++;
+          setTimeout(typeWriter, 150);
+        }, line.delay);
+        return;
+      }
+      
+      if (line.type === 'type') {
+        term.appendChild(div);
+        let charIdx = 0;
+        
+        function typeChar() {
+          if (charIdx < line.text.length) {
+            div.textContent += line.text.charAt(charIdx);
+            charIdx++;
+            setTimeout(typeChar, line.delay);
+          } else {
+            lineIdx++;
+            setTimeout(typeWriter, 150); // Pause between lines
+          }
+        }
+        
+        if (line.text === " ") {
+          div.innerHTML = "&nbsp;";
+          lineIdx++;
+          setTimeout(typeWriter, 50);
+        } else {
+          typeChar();
+        }
+      }
+    }
+    
+    setTimeout(typeWriter, 500); // Initial boot delay
+  </script>
 </body>
 </html>
